@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 // This custom middleware we can use anytime for user authentication
 export const verifyJWT = asyncHandler( async (req, res, next) =>{
     try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer", ""); // for mobile application we can't get token from cookie, thats whay second option valueable
+        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") // for mobile application we can't get token from cookie, thats whay second option valueable
     
         if(!token) {
             throw new ApiError(401, "Unauthorized Request");

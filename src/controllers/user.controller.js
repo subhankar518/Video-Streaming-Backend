@@ -108,14 +108,21 @@ const loginUser = asyncHandler( async (req, res) => {
     const updatedUser = await  User.findById(existedUser._id).select("-password -refreshToken");
 
     // this is for sercure cookie, only editable from server
-    const options = {
+    const accessOptions = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        maxAge: 5 * 60 * 1000
+    }
+
+    const refreshOptions = {
+        httpOnly: true,
+        secure: true,
+        maxAge: 10 * 60 * 1000
     }
 
     return res.status(200)
-              .cookie("accessToken", newAccessToken, options) // for seting tokens in browser
-              .cookie("RefreshToken", newRefreshToken, options)
+              .cookie("accessToken", newAccessToken, accessOptions) // for seting tokens in browser
+              .cookie("RefreshToken", newRefreshToken, refreshOptions)
               .json(new ApiRespose(200,
                 {
                     user: updatedUser, newAccessToken, newRefreshToken
@@ -225,19 +232,19 @@ const getCurrentUser = asyncHandler ( async (req,res) => {
 const updateAccountDetails = asyncHandler ( async (req,res) => {
     const {fullName, email, userName, phone, country} = req.body;
 
-    if(!fullName || !email || !userName || !phone || !country){
-        throw new ApiError(400, "All fields are required");
-    }
+    // if(!fullName || !email || !userName || !phone || !country){
+    //     throw new ApiError(400, "All fields are required");
+    // }
 
-    const userResponse= User.findByIdAndUpdate(
+    const userResponse= await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
-                fullName: fullName,
-                email: email,
-                userName: userName,
-                phone: phone,
-                country: country
+                fullName: fullName && fullName,
+                email: email && email,
+                userName: userName && userName,
+                phone: phone && phone,
+                country: country && country
             }
         },
         {
